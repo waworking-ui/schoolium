@@ -2,10 +2,9 @@ import datetime
 import pandas as pd
 import streamlit as st
 
-# --- 1. НАСТРОЙКИ СТРАНИЦЫ И ULTRA-MODERN UI/UX ---
+# --- 1. НАСТРОЙКИ СТРАНИЦЫ И UI/UX ---
 st.set_page_config(
-    page_title="SHKILKA | Next-Gen Education",
-    page_icon="⚡",
+    page_title="schoolium | education",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -15,120 +14,129 @@ st.markdown(
 <style>
     /* Полное сокрытие лишних элементов */
     #MainMenu {visibility: hidden;}
-    header {visibility: hidden;}
     footer {visibility: hidden;}
 
-    /* 🔒 ЖЕСТКАЯ БЛОКИРОВКА И ФИКСАЦИЯ САЙДБАРА (запрет на сворачивание и скрытие) */
-    section[data-testid="stSidebar"] {
-        width: 300px !important;
-        min-width: 300px !important;
-        max-width: 300px !important;
-        background: #ffffff !important;
-        border-right: 1px solid rgba(226, 232, 240, 0.8);
-        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.02);
-        transform: none !important;
+    /* Прозрачный шапко-контейнер для корректной работы кнопки открытия сайдбара */
+    header {
+        background: transparent !important;
+    }
+
+    /* Отображение кнопки открытия/закрытия сайдбара (стрелочки/гамбургера) */
+    [data-testid="collapsedControl"] {
+        display: flex !important;
         visibility: visible !important;
+        z-index: 100000;
+        color: #4f46e5 !important;
     }
 
-    /* Уменьшение вертикальных отступов между элементами в сайдбаре (сближение кнопок) */
+    /* СТИЛИЗАЦИЯ САЙДБАРА С ВОЗМОЖНОСТЬЮ СВОРАЧИВАНИЯ */
+    section[data-testid="stSidebar"] {
+        width: 320px !important;
+        background: rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-right: 1px solid rgba(226, 232, 240, 0.6);
+        box-shadow: 4px 0 24px rgba(15, 23, 42, 0.02);
+    }
+
     section[data-testid="stSidebar"] div[data-testid="stVerticalBlock"] {
-        gap: 0.35rem !important;
+        gap: 0.5rem !important;
+        padding-top: 1rem;
     }
 
-    /* Убираем все возможные триггеры сворачивания и стандартные шевроны/кнопки управления сайдбаром */
-    button[kind="header"], 
-    button[data-testid="baseButton-header"],
-    [data-testid="collapsedControl"],
-    [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarCollapsedControl"],
-    [data-testid="stSidebarContent"] button[kind="headerNoPadding"],
-    button[aria-label="Collapse sidebar"],
-    button[aria-label="Open sidebar"],
-    button[title="Collapse sidebar"],
-    button[title="Open sidebar"],
+    /* Скрытие стандартной системной навигации Streamlit */
     .stSidebarNavItems {
         display: none !important;
     }
 
-    /* Фикс для главного контейнера, чтобы контент не смещался из-за зафиксированного сайдбара */
     .main .block-container {
-        max-width: 100% !important;
-        padding-left: 3rem !important;
-        padding-right: 3rem !important;
+        max-width: 1200px !important;
+        padding-top: 4rem !important;
+        padding-left: 4rem !important;
+        padding-right: 4rem !important;
+        padding-bottom: 4rem !important;
     }
 
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 
     .stApp {
-        background: #f8fafc;
+        background-color: #f8fafc;
+        /* Элегантный минималистичный точечный паттерн */
+        background-image: radial-gradient(#e2e8f0 1.5px, transparent 1.5px);
+        background-size: 32px 32px;
         color: #0f172a;
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-    /* Стеклянные премиальные карточки (Glassmorphism / Neumorphism soft) */
+    /* Стилизация основных блоков и карточек */
     div[data-testid="stVerticalBlock"] > div > div > div[data-testid="stVerticalBlock"], 
     div[data-testid="stForm"],
     div[data-testid="stExpander"] {
         background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         border-radius: 24px !important;
-        border: 1px solid rgba(255, 255, 255, 1) !important;
-        box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.05), 0 0 1px 1px rgba(226, 232, 240, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.4) !important;
+        box-shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.05), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
         padding: 32px;
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
 
     div[data-testid="stVerticalBlock"] > div > div > div[data-testid="stVerticalBlock"]:hover {
-        box-shadow: 0 30px 60px -20px rgba(79, 70, 229, 0.08), 0 0 1px 1px rgba(99, 102, 241, 0.2);
+        box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 1);
+        transform: translateY(-2px);
     }
 
-    /* Футуристичные кнопки с неоновым градиентом */
+    /* Главные кнопки (Сочный градиент) */
     div.stButton > button:first-child {
-        background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
         color: white;
         border: none;
         border-radius: 16px;
         padding: 14px 28px;
         font-weight: 700;
         font-size: 0.95rem;
-        letter-spacing: -0.01em;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+        letter-spacing: 0.02em;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
     }
     div.stButton > button:first-child:hover {
-        transform: translateY(-3px) scale(1.01);
-        box-shadow: 0 20px 35px -5px rgba(168, 85, 247, 0.5);
+        transform: translateY(-3px);
+        box-shadow: 0 15px 25px -5px rgba(124, 58, 237, 0.5);
+    }
+    div.stButton > button:first-child:active {
+        transform: translateY(1px);
     }
 
-    /* Кнопка-ссылка "Подключиться" — единый стиль с обычными кнопками */
+    /* Ссылки-кнопки */
     div.stLinkButton > a {
-        background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%) !important;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
         color: white !important;
         border: none !important;
         border-radius: 16px !important;
         padding: 14px 28px !important;
         font-weight: 700 !important;
         font-size: 0.95rem !important;
-        letter-spacing: -0.01em;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
         justify-content: center;
+        text-decoration: none !important;
     }
     div.stLinkButton > a:hover {
-        transform: translateY(-3px) scale(1.01);
-        box-shadow: 0 20px 35px -5px rgba(168, 85, 247, 0.5);
-        color: white !important;
+        transform: translateY(-3px);
+        box-shadow: 0 15px 25px -5px rgba(124, 58, 237, 0.5);
     }
 
     /* Навигация в сайдбаре */
     .menu-active div.stButton > button:first-child {
-        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
         color: white !important;
-        box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+        box-shadow: 0 8px 20px -4px rgba(99, 102, 241, 0.4);
         width: 100%;
         text-align: left;
-        border-radius: 16px;
+        border-radius: 14px;
         font-weight: 700;
+        padding-left: 20px;
     }
     .menu-inactive div.stButton > button:first-child {
         background: transparent !important;
@@ -137,52 +145,61 @@ st.markdown(
         width: 100%;
         text-align: left;
         font-weight: 600;
-        border-radius: 16px;
+        border-radius: 14px;
+        padding-left: 20px;
     }
     .menu-inactive div.stButton > button:first-child:hover {
         background: #f1f5f9 !important;
-        color: #6366f1 !important;
-        transform: translateX(4px) !important;
+        color: #0f172a !important;
+        transform: translateX(6px) !important;
     }
 
-    /* Второстепенная кнопка */
+    /* Второстепенные кнопки */
     .btn-secondary div.stButton > button:first-child {
-        background: #f1f5f9;
+        background: #f8fafc;
         color: #475569;
-        box-shadow: none;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(15,23,42,0.02);
     }
     .btn-secondary div.stButton > button:first-child:hover {
-        background: #e2e8f0;
+        background: #f1f5f9;
         color: #0f172a;
-        transform: none;
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
     }
 
-    /* Карточка-рамка для занятия в расписании ученика */
-    .lesson-card {
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 20px !important;
-        background: rgba(255, 255, 255, 0.9) !important;
-    }
-
-    /* Эстетичные инпуты */
+    /* Инпуты */
     .stTextInput > div > div > input, .stDateInput > div > div > input, .stTimeInput > div > div > input, .stTextArea textarea {
-        background-color: #f8fafc;
+        background-color: #ffffff;
         color: #0f172a;
-        border: 1px solid #e2e8f0;
+        border: 2px solid #e2e8f0;
         border-radius: 16px;
-        padding: 14px 18px;
+        padding: 16px 20px;
         font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: inset 0 2px 4px rgba(15,23,42,0.02);
     }
     .stTextInput > div > div > input:focus, .stTextArea textarea:focus {
         border-color: #6366f1;
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
         background-color: #ffffff;
     }
 
-    h1, h2, h3 {
+    /* Заголовки */
+    h1 {
+        letter-spacing: -0.04em;
+        font-weight: 900;
+        color: #0f172a;
+        font-size: 2.5rem;
+    }
+    h2, h3 {
         letter-spacing: -0.03em;
         font-weight: 800;
+        color: #1e293b;
     }
+    
+    /* Скрытие Streamlit branding */
+    .st-emotion-cache-1wbqy5l {display: none;}
 </style>
 """,
     unsafe_allow_html=True,
@@ -200,15 +217,15 @@ if "users" not in st.session_state:
             "pass": "123",
             "role": "student",
             "name": "Алексей Учеников",
-            "status": "Цель: Сдать на 90+ баллов 🚀",
-            "avatar": "👨‍💻",
+            "status": "Цель: Сдать на 90+ баллов",
+            "avatar": "",
         },
         "student2": {
             "pass": "321",
             "role": "student",
             "name": "Дарья Отличница",
-            "status": "Изучаю высшую математику ✨",
-            "avatar": "👩‍🎓",
+            "status": "Изучаю высшую математику",
+            "avatar": "",
         },
     }
 
@@ -247,7 +264,6 @@ if "messages" not in st.session_state:
 if "manual_checks" not in st.session_state:
     st.session_state.manual_checks = {}
 
-# Система пробных экзаменов
 if "mock_templates" not in st.session_state:
     st.session_state.mock_templates = {}
 
@@ -280,26 +296,26 @@ def get_student_xp_and_stats(student_id):
                 solved += 1
                 att = t_state.get("attempts_left", 3)
                 if att == 3:
-                    xp += 100  # С первого раза
+                    xp += 100
                 elif att == 2:
-                    xp += 75  # Со второго раза
+                    xp += 75
                 else:
-                    xp += 50  # С третьего раза
+                    xp += 50
             elif t_state.get("status") == "failed":
                 failed += 1
-                xp += 25  # Неверно решено
+                xp += 25
     return xp, solved, failed
 
 
 def get_rank(xp):
     if xp < 200:
-        return "Новичок 🌱"
+        return "Новичок"
     elif xp < 500:
-        return "Продвинутый ⚡"
+        return "Продвинутый"
     elif xp < 1000:
-        return "Мастер 🔮"
+        return "Мастер"
     else:
-        return "Легенда SHKILKA 👑"
+        return "Легенда schoolium"
 
 
 # --- 3. АВТОРИЗАЦИЯ ---
@@ -314,7 +330,7 @@ def login(username, password):
         st.session_state.solving_course_id = None
         st.session_state.solving_mock_id = None
         st.session_state.current_menu = (
-            "Профиль и достижения 👤"
+            "Профиль и достижения"
             if st.session_state.users[username]["role"] == "student"
             else "Лидерборд"
         )
@@ -324,29 +340,34 @@ def login(username, password):
 
 
 if not st.session_state.logged_in:
+    st.markdown('<div style="margin-top: 10vh;"></div>', unsafe_allow_html=True)
+    
     st.markdown(
-        '<div style="margin-top: 8vh;"></div>', unsafe_allow_html=True
-    )
-    st.markdown(
-        '<h1 style="text-align: center; font-weight: 900; background:'
-        " linear-gradient(135deg, #6366f1, #a855f7, #ec4899);"
-        " -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-        ' font-size: 4rem;">SHKILKA</h1>',
+        """
+        <div style="text-align: center; margin-bottom: 24px;">
+            <svg width="80" height="15" viewBox="0 0 100 20" style="opacity: 0.8; margin-bottom: -15px;">
+                <path d="M0,10 Q25,0 50,10 T100,10" fill="none" stroke="#4f46e5" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+            <h1 style="font-weight: 900; background: linear-gradient(135deg, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 5rem; text-transform: lowercase; letter-spacing: -0.05em; margin: 0; line-height: 1;">schoolium</h1>
+            <svg width="80" height="15" viewBox="0 0 100 20" style="opacity: 0.8; margin-top: -5px;">
+                <path d="M0,10 Q25,20 50,10 T100,10" fill="none" stroke="#7c3aed" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
     st.markdown(
-        '<p style="text-align: center; color: #64748b; font-size: 1.2rem;'
-        ' margin-top: -10px; margin-bottom: 40px; font-weight: 600;">Интерактивная'
+        '<p style="text-align: center; color: #64748b; font-size: 1.25rem;'
+        ' margin-top: -10px; margin-bottom: 48px; font-weight: 500;">Интерактивная'
         " образовательная экосистема нового поколения</p>",
         unsafe_allow_html=True,
     )
 
-    col1, col2, col3 = st.columns([1.5, 2, 1.5])
+    col1, col2, col3 = st.columns([1, 1.5, 1])
     with col2:
         with st.container():
             st.markdown(
-                "<h3 style='text-align: center; margin-bottom: 24px;'>Вход в"
-                " систему</h3>",
+                "<h3 style='text-align: center; margin-bottom: 32px; font-weight: 800; color: #0f172a;'>Вход в систему</h3>",
                 unsafe_allow_html=True,
             )
             u_in = st.text_input("Логин", placeholder="admin или student1")
@@ -362,30 +383,33 @@ name = user_info["name"]
 
 if st.session_state.current_menu is None:
     st.session_state.current_menu = (
-        "Профиль и достижения 👤" if role == "student" else "Лидерборд"
+        "Профиль и достижения" if role == "student" else "Лидерборд"
     )
 
 # --- 4. САЙДБАР ---
 with st.sidebar:
     st.markdown(
-        '<h1 style="text-align: center; font-weight: 950; background:'
-        " linear-gradient(135deg, #6366f1, #ec4899);"
-        " -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-        ' margin-bottom: 16px; font-size: 2.8rem;">SHKILKA</h1>',
+        """
+        <div style="text-align: center; margin-bottom: 32px; margin-top: 10px;">
+            <h1 style="font-weight: 900; background: linear-gradient(135deg, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2.5rem; text-transform: lowercase; letter-spacing: -0.04em; margin: 0;">schoolium</h1>
+            <svg width="60" height="10" viewBox="0 0 100 20" style="opacity: 0.6; margin-top: -5px;">
+                <path d="M0,10 Q25,20 50,10 T100,10" fill="none" stroke="#4f46e5" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
     if role == "student":
-        avatar_icon = user_info.get("avatar", "🚀")
         is_profile_selected = (
-                st.session_state.current_menu == "Профиль и достижения 👤"
+                st.session_state.current_menu == "Профиль и достижения"
         )
         profile_css = "menu-active" if is_profile_selected else "menu-inactive"
         st.markdown(f'<div class="{profile_css}">', unsafe_allow_html=True)
         if st.button(
-                f"{avatar_icon}  {name}", key="nav_profile_btn", use_container_width=True
+                f"👤 {name}", key="nav_profile_btn", use_container_width=True
         ):
-            st.session_state.current_menu = "Профиль и достижения 👤"
+            st.session_state.current_menu = "Профиль и достижения"
             st.session_state.solving_v_id = None
             st.session_state.solving_course_id = None
             st.session_state.solving_mock_id = None
@@ -394,12 +418,12 @@ with st.sidebar:
     else:
         st.markdown(
             f"""
-            <div style="background: linear-gradient(135deg, #f8fafc, #f1f5f9); padding: 16px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #e2e8f0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);">
+            <div style="background: rgba(255, 255, 255, 0.8); padding: 16px; border-radius: 20px; margin-bottom: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(15,23,42,0.03);">
                 <div style="display: flex; align-items: center;">
-                    <div style="background: linear-gradient(135deg, #6366f1, #a855f7); color: white; width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.3rem; margin-right: 14px; box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);">👑</div>
+                    <div style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; margin-right: 14px; box-shadow: 0 8px 16px -4px rgba(99, 102, 241, 0.4);">ПР</div>
                     <div style="overflow: hidden;">
-                        <div style="font-weight: 700; font-size: 0.95rem; color: #0f172a; white-space: nowrap; text-overflow: ellipsis;">{name}</div>
-                        <div style="font-size: 0.78rem; color: #6366f1; font-weight: 600;">Преподаватель</div>
+                        <div style="font-weight: 800; font-size: 0.95rem; color: #0f172a; white-space: nowrap; text-overflow: ellipsis;">{name}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Преподаватель PRO</div>
                     </div>
                 </div>
             </div>
@@ -408,16 +432,16 @@ with st.sidebar:
         )
 
     nav_items = (
-        ["Мои задания", "Расписание", "Пробные экзамены", "Сообщения ✉️"]
+        ["Мои курсы", "Расписание", "Пробные экзамены", "Сообщения"]
         if role == "student"
         else [
             "Лидерборд",
-            "Управление курсами 📚",
-            "Конструктор вариантов ✨",
+            "Управление курсами",
+            "Конструктор вариантов",
             "Отправка заданий",
-            "Пробные экзамены 📝",
-            "Проверка заданий 📝",
-            "Сообщения ✉️",
+            "Пробные экзамены",
+            "Проверка заданий",
+            "Сообщения",
             "Расписание",
             "Ученики",
         ]
@@ -426,8 +450,21 @@ with st.sidebar:
     for item in nav_items:
         is_selected = st.session_state.current_menu == item
         css_class = "menu-active" if is_selected else "menu-inactive"
+        
+        icon = ""
+        if item == "Мои курсы": icon = "📚 "
+        elif item == "Расписание": icon = "🗓️ "
+        elif item == "Пробные экзамены": icon = "⚡ "
+        elif item == "Сообщения": icon = "💬 "
+        elif item == "Лидерборд": icon = "🏆 "
+        elif item == "Управление курсами": icon = "⚙️ "
+        elif item == "Конструктор вариантов": icon = "🛠️ "
+        elif item == "Отправка заданий": icon = "🚀 "
+        elif item == "Проверка заданий": icon = "✔️ "
+        elif item == "Ученики": icon = "👥 "
+
         st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button(item, key=f"nav_{item}", use_container_width=True):
+        if st.button(f"{icon}{item}", key=f"nav_{item}", use_container_width=True):
             st.session_state.current_menu = item
             st.session_state.solving_v_id = None
             st.session_state.solving_course_id = None
@@ -435,17 +472,7 @@ with st.sidebar:
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    st.markdown(
-        """
-          <div style="background: linear-gradient(135deg, #eef2ff 0%, #fae8ff 100%); padding: 14px; border-radius: 20px; margin-bottom: 10px; border: 1px solid #e0e7ff;">
-              <div style="font-weight: 700; font-size: 0.85rem; color: #6366f1; margin-bottom: 4px;">⚡ PRO Ecosystem</div>
-              <div style="font-size: 0.75rem; color: #64748b; line-height: 1.4;">Интерфейс надежно зафиксирован.</div>
-          </div>
-      """,
-        unsafe_allow_html=True,
-    )
+    st.markdown("<br><br>", unsafe_allow_html=True)
 
     st.markdown('<div class="btn-secondary">', unsafe_allow_html=True)
     if st.button("Выйти из системы", use_container_width=True):
@@ -461,10 +488,10 @@ menu = st.session_state.current_menu
 
 if role == "admin":
     if menu == "Лидерборд":
-        st.title("Лидерборд учеников 🏆")
+        st.title("Лидерборд учеников")
         st.markdown(
             "<p style='color: #64748b; margin-top: -10px; margin-bottom:"
-            " 25px;'>Глобальный рейтинг успеваемости и опыта учащихся</p>",
+            " 32px;'>Глобальный рейтинг успеваемости и опыта учащихся</p>",
             unsafe_allow_html=True,
         )
 
@@ -496,13 +523,13 @@ if role == "admin":
                 st.info("Ученики еще не заработали опыт.")
             else:
                 st.dataframe(df_lb, use_container_width=True)
-                st.bar_chart(df_lb.set_index("Ученик")["XP"], color="#6366f1")
+                st.bar_chart(df_lb.set_index("Ученик")["XP"], color="#4f46e5")
 
-    elif menu == "Управление курсами 📚":
-        st.title("Управление курсами 📚")
+    elif menu == "Управление курсами":
+        st.title("Управление курсами")
         st.markdown(
             "<p style='color: #64748b; margin-top: -10px; margin-bottom:"
-            " 25px;'>Создавайте курсы и управляйте доступом учеников к ним</p>",
+            " 32px;'>Создавайте курсы и управляйте доступом учеников к ним</p>",
             unsafe_allow_html=True,
         )
 
@@ -562,20 +589,23 @@ if role == "admin":
                             if cid in st.session_state.course_assignments[s_id]:
                                 st.session_state.course_assignments[s_id].remove(cid)
 
-                    if col_c2.button("🗑️ Удалить курс", key=f"del_course_{cid}"):
+                    st.markdown('<div class="btn-secondary">', unsafe_allow_html=True)
+                    if col_c2.button("Удалить курс", key=f"del_course_{cid}"):
                         del st.session_state.courses[cid]
                         st.rerun()
+                    st.markdown('</div>', unsafe_allow_html=True)
+                    
                     st.markdown(
-                        '<hr style="margin: 20px 0; border: none; border-top: 1px solid'
-                        ' #cbd5e1;">',
+                        '<hr style="margin: 24px 0; border: none; border-top: 1px solid'
+                        ' #e2e8f0;">',
                         unsafe_allow_html=True,
                     )
 
-    elif menu == "Конструктор вариантов ✨":
-        st.title("Конструктор вариантов 🛠️")
+    elif menu == "Конструктор вариантов":
+        st.title("Конструктор вариантов")
         st.markdown(
             "<p style='color: #64748b; margin-top: -10px; margin-bottom:"
-            " 25px;'>Создавайте тесты с фото к заданиям и пояснениям</p>",
+            " 32px;'>Создавайте тесты с фото к заданиям и пояснениям</p>",
             unsafe_allow_html=True,
         )
 
@@ -607,7 +637,7 @@ if role == "admin":
         st.markdown("### Список заданий в варианте")
 
         if not st.session_state.builder_tasks:
-            st.info("Вариант пока пустой. Добавьте первое задание ниже 👇")
+            st.info("Вариант пока пустой. Добавьте первое задание ниже.")
         else:
             for idx, task in enumerate(st.session_state.builder_tasks):
                 with st.container():
@@ -616,9 +646,11 @@ if role == "admin":
                         f"#### Задание #{idx + 1}"
                         f" ({'Ручная проверка' if task.get('is_manual') else 'Автопроверка'})"
                     )
-                    if col_h2.button("🗑️ Удалить", key=f"del_bt_{idx}"):
+                    st.markdown('<div class="btn-secondary">', unsafe_allow_html=True)
+                    if col_h2.button("Удалить", key=f"del_bt_{idx}"):
                         st.session_state.builder_tasks.pop(idx)
                         st.rerun()
+                    st.markdown('</div>', unsafe_allow_html=True)
 
                     task["question_text"] = st.text_input(
                         "Текст вопроса / условие",
@@ -630,12 +662,14 @@ if role == "admin":
                         st.image(
                             task["task_img"], caption="Текущее фото к заданию", width=250
                         )
-                        if st.button("🗑️ Удалить фото задания", key=f"del_t_img_{idx}"):
+                        st.markdown('<div class="btn-secondary">', unsafe_allow_html=True)
+                        if st.button("Удалить фото задания", key=f"del_t_img_{idx}"):
                             task["task_img"] = None
                             st.rerun()
+                        st.markdown('</div>', unsafe_allow_html=True)
 
                     new_t_img = st.file_uploader(
-                        f"📸 Заменить или добавить фото к заданию #{idx + 1}",
+                        f"Заменить или добавить фото к заданию #{idx + 1}",
                         type=["png", "jpg", "jpeg"],
                         key=f"task_img_file_{idx}",
                     )
@@ -662,12 +696,14 @@ if role == "admin":
                         st.image(
                             task["expl_img"], caption="Текущее фото к разбору", width=250
                         )
-                        if st.button("🗑️ Удалить фото разбора", key=f"del_e_img_{idx}"):
+                        st.markdown('<div class="btn-secondary">', unsafe_allow_html=True)
+                        if st.button("Удалить фото разбора", key=f"del_e_img_{idx}"):
                             task["expl_img"] = None
                             st.rerun()
+                        st.markdown('</div>', unsafe_allow_html=True)
 
                     new_e_img = st.file_uploader(
-                        f"📸 Заменить или добавить фото к разбору #{idx + 1}",
+                        f"Заменить или добавить фото к разбору #{idx + 1}",
                         type=["png", "jpg", "jpeg"],
                         key=f"expl_img_file_{idx}",
                     )
@@ -677,14 +713,14 @@ if role == "admin":
                     st.markdown("---")
 
         with st.container():
-            st.markdown("#### ➕ Добавить новое задание")
+            st.markdown("#### Добавить новое задание")
             new_q_text = st.text_input(
                 "Текст нового вопроса",
                 placeholder="Введите условие задачи...",
                 key="new_q_text_input",
             )
             new_img = st.file_uploader(
-                "📸 Изображение к заданию (опционально)",
+                "Изображение к заданию (опционально)",
                 type=["png", "jpg", "jpeg"],
                 key="new_img_uploader",
             )
@@ -700,12 +736,12 @@ if role == "admin":
                 "Разбор решения", placeholder="Объяснение...", key="new_expl_textarea"
             )
             new_expl_img = st.file_uploader(
-                "📸 Изображение к пояснению (опционально)",
+                "Изображение к пояснению (опционально)",
                 type=["png", "jpg", "jpeg"],
                 key="new_expl_img_uploader",
             )
 
-            if st.button("➕ Добавить задание в вариант", use_container_width=True):
+            if st.button("Добавить задание в вариант", use_container_width=True):
                 if new_q_text:
                     st.session_state.builder_tasks.append({
                         "question_text": new_q_text,
@@ -721,7 +757,7 @@ if role == "admin":
                     st.error("Заполните текст вопроса.")
 
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("💾 Сохранить весь вариант в курс", use_container_width=True):
+        if st.button("Сохранить весь вариант в курс", use_container_width=True):
             if (
                     st.session_state.builder_title
                     and st.session_state.builder_tasks
@@ -739,7 +775,7 @@ if role == "admin":
                 }
                 st.session_state.builder_tasks = []
                 st.session_state.builder_title = ""
-                st.toast("Вариант успешно сохранен в выбранный курс! 🎉")
+                st.toast("Вариант успешно сохранен в выбранный курс!")
                 st.rerun()
             else:
                 st.error(
@@ -748,10 +784,10 @@ if role == "admin":
                 )
 
     elif menu == "Отправка заданий":
-        st.title("Распределение тестов 🚀")
+        st.title("Распределение тестов")
         st.markdown(
             "<p style='color: #64748b; margin-top: -10px; margin-bottom:"
-            " 25px;'>Дополнительное назначение тестов и дедлайнов</p>",
+            " 32px;'>Дополнительное назначение тестов и дедлайнов</p>",
             unsafe_allow_html=True,
         )
 
@@ -796,14 +832,14 @@ if role == "admin":
                         key=f"ms_{v_id}",
                     )
 
-                    if st.button("📤 Отправить выбранным ученикам", key=f"snd_{v_id}"):
+                    if st.button("Отправить выбранным ученикам", key=f"snd_{v_id}"):
                         for s_id in selected_st:
                             if s_id not in st.session_state.assignments or not isinstance(
                                     st.session_state.assignments[s_id], dict
                             ):
                                 st.session_state.assignments[s_id] = {}
                             st.session_state.assignments[s_id][v_id] = deadline_str
-                        st.toast(f"Вариант успешно отправлен!")
+                        st.toast("Вариант успешно отправлен!")
 
                     st.markdown(
                         '<div class="btn-secondary" style="margin-top: 10px;">',
@@ -814,11 +850,11 @@ if role == "admin":
                         st.rerun()
                     st.markdown("</div>", unsafe_allow_html=True)
 
-    elif menu == "Пробные экзамены 📝":
-        st.title("Конструктор и отправка пробных экзаменов 📝")
+    elif menu == "Пробные экзамены":
+        st.title("Конструктор и отправка пробных экзаменов")
         st.markdown(
             "<p style='color: #64748b; margin-top: -10px; margin-bottom:"
-            " 25px;'>Создавайте пробники с таймером и картинками, настраивайте"
+            " 32px;'>Создавайте пробники с таймером и картинками, настраивайте"
             " отправку</p>",
             unsafe_allow_html=True,
         )
@@ -864,19 +900,21 @@ if role == "admin":
                         "Эталонный ответ (для проверки преподом):"
                         f" {m_task['reference_answer']}"
                     )
-
-                    if col_m2.button("🗑️ Удалить", key=f"del_bm_{idx}"):
+                    
+                    st.markdown('<div class="btn-secondary">', unsafe_allow_html=True)
+                    if col_m2.button("Удалить", key=f"del_bm_{idx}"):
                         st.session_state.builder_mock_tasks.pop(idx)
                         st.rerun()
+                    st.markdown('</div>', unsafe_allow_html=True)
                     st.markdown("---")
 
         with st.container():
-            st.markdown("#### ➕ Добавить задание в пробник")
+            st.markdown("#### Добавить задание в пробник")
             t_q_text = st.text_input(
                 "Текст вопроса", placeholder="Условие задачи...", key="bm_q_text"
             )
             t_img = st.file_uploader(
-                "📸 Картинка к заданию (опционально)",
+                "Картинка к заданию (опционально)",
                 type=["png", "jpg", "jpeg"],
                 key="bm_img_uploader",
             )
@@ -886,7 +924,7 @@ if role == "admin":
                 key="bm_ref_ans",
             )
 
-            if st.button("➕ Добавить задание в шаблон", use_container_width=True):
+            if st.button("Добавить задание в шаблон", use_container_width=True):
                 if t_q_text:
                     st.session_state.builder_mock_tasks.append({
                         "question_text": t_q_text,
@@ -899,7 +937,7 @@ if role == "admin":
                     st.error("Заполните текст вопроса.")
 
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("💾 Сохранить шаблон пробного экзамена", use_container_width=True):
+        if st.button("Сохранить шаблон пробного экзамена", use_container_width=True):
             if st.session_state.builder_mock_tasks:
                 m_id = (
                     max(st.session_state.mock_templates.keys()) + 1
@@ -918,13 +956,13 @@ if role == "admin":
                     "tasks": st.session_state.builder_mock_tasks,
                 }
                 st.session_state.builder_mock_tasks = []
-                st.toast("Шаблон пробного экзамена успешно сохранен! 🎉")
+                st.toast("Шаблон пробного экзамена успешно сохранен!")
                 st.rerun()
             else:
                 st.error("Добавьте хотя бы одно задание в пробный экзамен.")
 
         st.markdown("---")
-        st.markdown("### 📤 Отправка пробных экзаменов ученикам")
+        st.markdown("### Отправка пробных экзаменов ученикам")
         if not st.session_state.mock_templates:
             st.info("Нет сохраненных шаблонов пробных экзаменов.")
         else:
@@ -954,7 +992,7 @@ if role == "admin":
                     )
 
                     if col_t1.button(
-                            "🚀 Отправить выбранным ученикам", key=f"btn_send_mock_{m_id}"
+                            "Отправить выбранным ученикам", key=f"btn_send_mock_{m_id}"
                     ):
                         for s_id in selected_st_mock:
                             if s_id not in st.session_state.mock_exams:
@@ -991,20 +1029,22 @@ if role == "admin":
                                 st.session_state.mock_exams[s_id].append(exam_instance)
 
                         st.toast(
-                            "Пробный экзамен успешно отправлен выбранным ученикам! ⚡"
+                            "Пробный экзамен успешно отправлен выбранным ученикам!"
                         )
                         st.rerun()
-
-                    if col_t2.button("🗑️ Удалить шаблон", key=f"del_mock_tmpl_{m_id}"):
+                        
+                    st.markdown('<div class="btn-secondary">', unsafe_allow_html=True)
+                    if col_t2.button("Удалить шаблон", key=f"del_mock_tmpl_{m_id}"):
                         del st.session_state.mock_templates[m_id]
                         st.rerun()
+                    st.markdown('</div>', unsafe_allow_html=True)
                     st.markdown("---")
 
-    elif menu == "Проверка заданий 📝":
-        st.title("Проверка заданий и пробных экзаменов 📝")
+    elif menu == "Проверка заданий":
+        st.title("Проверка заданий и пробников")
         st.markdown(
             "<p style='color: #64748b; margin-top: -10px; margin-bottom:"
-            " 25px;'>Проверяйте развернутые ответы, а также выставляйте оценку и"
+            " 32px;'>Проверяйте развернутые ответы, а также выставляйте оценку и"
             " баллы за пробные экзамены</p>",
             unsafe_allow_html=True,
         )
@@ -1015,7 +1055,7 @@ if role == "admin":
             if uinfo["role"] == "student"
         }
 
-        st.markdown("### 📋 Пробные экзамены, ожидающие проверки")
+        st.markdown("### Пробные экзамены, ожидающие проверки")
         mock_pending_found = False
         for s_id, s_exams in st.session_state.mock_exams.items():
             s_name = students_dict.get(s_id, {"name": s_id})["name"]
@@ -1055,21 +1095,21 @@ if role == "admin":
                         )
 
                         if st.button(
-                                "📤 Отправить результат ученику",
+                                "Отправить результат ученику",
                                 key=f"send_mock_result_{s_id}_{ex['number']}",
                         ):
                             ex["grade"] = grade_val
                             ex["primary_score"] = p_score
                             ex["max_score"] = max_score_val
                             ex["status"] = "graded"
-                            st.toast(f"Результаты отправлены ученику!")
+                            st.toast("Результаты отправлены ученику!")
                             st.rerun()
                         st.markdown("---")
         if not mock_pending_found:
             st.info("Нет пробных экзаменов, ожидающих проверки.")
 
         st.markdown("---")
-        st.markdown("### 📝 Обычные домашние задания (ручная проверка)")
+        st.markdown("### Обычные домашние задания (ручная проверка)")
         pending_found = False
         for s_id, s_prog in st.session_state.student_progress.items():
             s_name = students_dict.get(s_id, {"name": s_id})["name"]
@@ -1092,28 +1132,31 @@ if role == "admin":
 
                                 c_chk1, c_chk2 = st.columns(2)
                                 if c_chk1.button(
-                                        "✅ Засчитать верно (+100 XP)",
+                                        "Засчитать верно (+100 XP)",
                                         key=f"pass_{s_id}_{v_id}_{t_idx}",
                                 ):
                                     t_state["status"] = "solved"
                                     t_state["feedback"] = "right"
                                     st.toast("Ответ одобрен!")
                                     st.rerun()
+                                
+                                st.markdown('<div class="btn-secondary">', unsafe_allow_html=True)
                                 if c_chk2.button(
-                                        "❌ Отклонить", key=f"fail_{s_id}_{v_id}_{t_idx}"
+                                        "Отклонить", key=f"fail_{s_id}_{v_id}_{t_idx}"
                                 ):
                                     t_state["status"] = "failed"
                                     t_state["feedback"] = "wrong"
                                     st.toast("Ответ отклонен.")
                                     st.rerun()
+                                st.markdown('</div>', unsafe_allow_html=True)
         if not pending_found:
             st.info("Нет обычных заданий, ожидающих ручной проверки.")
 
-    elif menu == "Сообщения ✉️":
-        st.title("Сообщения от учеников ✉️")
+    elif menu == "Сообщения":
+        st.title("Сообщения от учеников")
         st.markdown(
             "<p style='color: #64748b; margin-top: -10px; margin-bottom:"
-            " 25px;'>Диалоги и вопросы от учащихся</p>",
+            " 32px;'>Диалоги и вопросы от учащихся</p>",
             unsafe_allow_html=True,
         )
 
@@ -1138,9 +1181,9 @@ if role == "admin":
             else:
                 for m in user_msgs:
                     sender_label = (
-                        f"👨‍💻 {students_dict[target_st]['name']}"
+                        f"Ученик {students_dict[target_st]['name']}"
                         if m["sender"] == "student"
-                        else "👨‍🏫 Преподаватель"
+                        else "Преподаватель"
                     )
                     st.write(f"**{sender_label}:** {m['text']}")
 
@@ -1159,10 +1202,10 @@ if role == "admin":
                     st.rerun()
 
     elif menu == "Расписание":
-        st.title("Календарь и расписание преподавателя 📅")
+        st.title("Календарь и расписание преподавателя")
         st.markdown(
             "<p style='color: #64748b; margin-top: -10px; margin-bottom:"
-            " 25px;'>Сводное расписание всех занятий с учениками и управление"
+            " 32px;'>Сводное расписание всех занятий с учениками и управление"
             " графиком</p>",
             unsafe_allow_html=True,
         )
@@ -1174,7 +1217,7 @@ if role == "admin":
         }
 
         with st.container():
-            st.markdown("### ➕ Назначить новое занятие")
+            st.markdown("### Назначить новое занятие")
             target_student = st.selectbox(
                 "Ученик",
                 options=list(students_dict.keys()),
@@ -1205,7 +1248,7 @@ if role == "admin":
                     st.rerun()
 
         st.markdown("---")
-        st.markdown("### 📋 Все запланированные занятия преподавателя")
+        st.markdown("### Все запланированные занятия преподавателя")
 
         all_lessons = []
         for s_id, lessons in st.session_state.schedule.items():
@@ -1230,25 +1273,25 @@ if role == "admin":
                 with st.container():
                     col_sch1, col_sch2 = st.columns([4, 1])
                     col_sch1.markdown(
-                        f"#### 👤 Ученик: {item['student_name']} | 📚 Тема:"
+                        f"#### Ученик: {item['student_name']} | Тема:"
                         f" {item['title']}"
                     )
                     col_sch1.markdown(
-                        "📅 Дата и время:"
+                        "Дата и время:"
                         " **<span style='font-size: 1.1rem; font-weight:"
-                        f" 800;'>{item['datetime']} (МСК)</span>**",
+                        f" 800; color: #4f46e5;'>{item['datetime']} (МСК)</span>**",
                         unsafe_allow_html=True,
                     )
                     if item["link"]:
                         col_sch1.markdown(
-                            f"🔗 Ссылка на урок: [Подключиться]({item['link']})"
+                            f"Ссылка на урок: [Подключиться]({item['link']})"
                         )
                     else:
-                        col_sch1.write("🔗 Ссылка не указана")
+                        col_sch1.write("Ссылка не указана")
 
                     st.markdown('<div class="btn-secondary">', unsafe_allow_html=True)
                     if col_sch2.button(
-                            "🗑️ Отменить урок",
+                            "Отменить урок",
                             key=f"del_lesson_{item['student_id']}_{item['index']}",
                     ):
                         st.session_state.schedule[item["student_id"]].pop(item["index"])
@@ -1256,10 +1299,10 @@ if role == "admin":
                     st.markdown("</div>", unsafe_allow_html=True)
 
     elif menu == "Ученики":
-        st.title("База учеников 👥")
+        st.title("База учеников")
         st.markdown(
             "<p style='color: #64748b; margin-top: -10px; margin-bottom:"
-            " 25px;'>Управление учетными записями учащихся</p>",
+            " 32px;'>Управление учетными записями учащихся</p>",
             unsafe_allow_html=True,
         )
 
@@ -1274,8 +1317,8 @@ if role == "admin":
                         "pass": new_pass,
                         "role": "student",
                         "name": new_name,
-                        "status": "Ученик SHKILKA",
-                        "avatar": "🎓",
+                        "status": "Ученик schoolium",
+                        "avatar": "",
                     }
                     st.toast("Ученик успешно добавлен!")
                     st.rerun()
@@ -1295,42 +1338,52 @@ if role == "admin":
 elif role == "student":
     curr_user = st.session_state.current_user
 
-    if menu == "Профиль и достижения 👤":
-        st.title("Профиль, статистика и достижения 👤")
+    if menu == "Профиль и достижения":
+        st.title("Личный кабинет ученика")
         st.markdown(
             "<p style='color: #64748b; margin-top: -10px; margin-bottom:"
-            " 25px;'>Ваша личная информация, аналитика успеваемости и коллекция"
-            " наград</p>",
+            " 32px;'>Ваша личная информация, аналитика успеваемости и коллекция наград</p>",
             unsafe_allow_html=True,
         )
 
-        # Блок 1: Настройки профиля
-        st.markdown("### ⚙️ Настройки профиля")
         with st.container():
+            st.markdown("### Настройки профиля")
             new_name = st.text_input("Имя и Фамилия", value=user_info["name"])
-            new_status = st.text_input(
-                "Ваш статус / цель", value=user_info.get("status", "")
-            )
             if st.button("Сохранить изменения профиля"):
                 user_info["name"] = new_name
-                user_info["status"] = new_status
                 st.toast("Профиль успешно обновлен!")
                 st.rerun()
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # Блок 2: Статистика и аналитика
-        st.markdown("### 📊 Аналитика успеваемости и статистика")
+        st.markdown("### Аналитика успеваемости и статистика")
         xp, solved, failed = get_student_xp_and_stats(curr_user)
         c1, c2, c3 = st.columns(3)
-        c1.metric("Опыт (XP)", f"{xp} ⚡")
-        c2.metric("Решено", f"{solved} ✅")
-        c3.metric("Ошибок", f"{failed} ❌")
+        
+        c1.markdown(f"""
+            <div style="background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.3);">
+                <div style="font-size: 0.9rem; font-weight: 600; opacity: 0.9; margin-bottom: 8px;">Опыт (XP)</div>
+                <div style="font-size: 2.5rem; font-weight: 900; line-height: 1;">{xp}⚡</div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        c2.markdown(f"""
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; color: #0f172a; box-shadow: 0 4px 12px rgba(15,23,42,0.03);">
+                <div style="font-size: 0.9rem; font-weight: 600; color: #64748b; margin-bottom: 8px;">Решено задач</div>
+                <div style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: #10b981;">{solved}</div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        c3.markdown(f"""
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; color: #0f172a; box-shadow: 0 4px 12px rgba(15,23,42,0.03);">
+                <div style="font-size: 0.9rem; font-weight: 600; color: #64748b; margin-bottom: 8px;">Ошибок</div>
+                <div style="font-size: 2.5rem; font-weight: 900; line-height: 1; color: #f43f5e;">{failed}</div>
+            </div>
+        """, unsafe_allow_html=True)
 
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("<br><br>", unsafe_allow_html=True)
 
-        # Блок 3: Рейтинг учеников (текущее место + 2 спереди и 2 сзади)
-        st.markdown("### 🏆 Позиция в рейтинге")
+        st.markdown("### Позиция в рейтинге")
         all_students = {
             uid: uinfo
             for uid, uinfo in st.session_state.users.items()
@@ -1346,21 +1399,18 @@ elif role == "student":
                 "Ранг": get_rank(s_xp),
             })
 
-        # Сортируем по XP по убыванию
         lb_data = sorted(lb_data, key=lambda x: x["XP"], reverse=True)
 
-        # Находим индекс текущего ученика
         curr_idx = next((i for i, item in enumerate(lb_data) if item["id"] == curr_user), None)
 
         if curr_idx is not None:
-            # Выделяем диапазон: 2 спереди, текущий, 2 сзади
             start_idx = max(0, curr_idx - 2)
             end_idx = min(len(lb_data), curr_idx + 3)
             window_data = lb_data[start_idx:end_idx]
 
             display_window = []
             for idx, item in enumerate(window_data, start=start_idx + 1):
-                is_me = " ⭐ (Вы)" if item["id"] == curr_user else ""
+                is_me = " (Вы)" if item["id"] == curr_user else ""
                 display_window.append({
                     "Место": f"#{idx}",
                     "Ученик": item["Ученик"] + is_me,
@@ -1374,8 +1424,7 @@ elif role == "student":
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # Блок 4: Достижения и ранги
-        st.markdown("### 🏅 Достижения и ранги")
+        st.markdown("### Достижения и ранги")
         with st.container():
             st.write(f"Ваш текущий ранг: **{get_rank(xp)}**")
             st.progress(
@@ -1383,7 +1432,7 @@ elif role == "student":
                 text=f"Прогресс до ранга Легенда: {xp}/1000 XP",
             )
 
-    elif menu == "Мои задания":
+    elif menu == "Мои курсы":
         if st.session_state.solving_v_id is not None:
             v_id = st.session_state.solving_v_id
             variant = st.session_state.variants[v_id]
@@ -1433,11 +1482,11 @@ elif role == "student":
                     int((solved_count / total_tasks) * 100) if total_tasks > 0 else 0
                 )
                 st.success(
-                    f"🎉 Вариант успешно пройден! Верных ответов: {solved_count} из"
+                    f"Вариант успешно пройден. Верных ответов: {solved_count} из"
                     f" {total_tasks} ({pct}%)"
                 )
 
-            st.markdown("##### 📌 Навигация по заданиям варианта:")
+            st.markdown("##### Навигация по заданиям:")
             cols_nav = st.columns(min(len(tasks), 8))
             for idx in range(len(tasks)):
                 t_st = p_data["task_states"][idx]
@@ -1479,7 +1528,7 @@ elif role == "student":
                 if t_state["status"] == "in_progress":
                     if t_state.get("feedback") == "wrong":
                         st.error(
-                            f"❌ Неверный ответ! Осталось попыток:"
+                            f"Неверный ответ. Осталось попыток:"
                             f" {t_state['attempts_left']}"
                         )
 
@@ -1515,16 +1564,16 @@ elif role == "student":
                 elif t_state["status"] in ["solved", "failed"]:
                     if t_state["status"] == "solved":
                         st.success(
-                            f"✨ Верный ответ! (Ваш ответ: {t_state.get('user_answer', '')})"
+                            f"Верный ответ. (Ваш ответ: {t_state.get('user_answer', '')})"
                         )
                     else:
                         st.error(
-                            "❌ Неверный ответ. Попытки исчерпаны. (Ваш ответ:"
+                            "Неверный ответ. Попытки исчерпаны. (Ваш ответ:"
                             f" {t_state.get('user_answer', '')})"
                         )
 
                     if task.get("expl_text") or task.get("expl_img"):
-                        with st.expander("📖 Пояснение к решению", expanded=True):
+                        with st.expander("Пояснение к решению", expanded=True):
                             if task.get("expl_text"):
                                 st.write(task["expl_text"])
                             if task.get("expl_img"):
@@ -1533,11 +1582,13 @@ elif role == "student":
                 st.markdown("<br>", unsafe_allow_html=True)
                 col_prev, col_next = st.columns(2)
                 if curr_idx > 0:
-                    if col_prev.button("← Предыдущее задание", use_container_width=True):
+                    st.markdown('<div class="btn-secondary">', unsafe_allow_html=True)
+                    if col_prev.button("Предыдущее задание", use_container_width=True):
                         p_data["curr_idx"] -= 1
                         st.rerun()
+                    st.markdown('</div>', unsafe_allow_html=True)
                 if curr_idx < len(tasks) - 1:
-                    if col_next.button("Следующее задание →", use_container_width=True):
+                    if col_next.button("Следующее задание", use_container_width=True):
                         p_data["curr_idx"] += 1
                         st.rerun()
 
@@ -1554,7 +1605,7 @@ elif role == "student":
             st.title(f"{course.get('title', 'Курс')}")
             st.markdown(
                 "<p style='color: #64748b; margin-top: -10px; margin-bottom:"
-                " 25px;'>Доступные домашние задания по курсу</p>",
+                " 32px;'>Доступные домашние задания по курсу</p>",
                 unsafe_allow_html=True,
             )
 
@@ -1580,11 +1631,11 @@ elif role == "student":
                         finished = prog.get("finished", False)
                         if finished:
                             c1.success(
-                                "✅ ДЗ выполнено (нажмите «Приступить», чтобы просмотреть"
+                                "ДЗ выполнено (нажмите «Приступить», чтобы просмотреть"
                                 " решения)"
                             )
                         else:
-                            c1.info("⚡ Доступно для выполнения")
+                            c1.info("Доступно для выполнения")
 
                         if c2.button(
                                 "Приступить", key=f"start_v_{v_id}", use_container_width=True
@@ -1593,10 +1644,10 @@ elif role == "student":
                             st.rerun()
 
         else:
-            st.title("Список курсов 📚")
+            st.title("Список курсов")
             st.markdown(
                 "<p style='color: #64748b; margin-top: -10px; margin-bottom:"
-                " 25px;'>Выберите курс, чтобы перейти к списку домашних заданий</p>",
+                " 32px;'>Выберите курс, чтобы перейти к списку домашних заданий</p>",
                 unsafe_allow_html=True,
             )
 
@@ -1612,7 +1663,6 @@ elif role == "student":
             if not available_courses:
                 st.info("У вас пока нет назначенных курсов.")
             else:
-                # Отображаем курсы с тонкими четкими линиями разделения
                 course_keys = list(available_courses.keys())
                 for idx_c, (cid, cdata) in enumerate(available_courses.items()):
                     with st.container():
@@ -1646,7 +1696,7 @@ elif role == "student":
                             )
 
                             col_c1.markdown(
-                                "📊 **Прогресс по курсу:** Решено задач:"
+                                "Прогресс по курсу: Решено задач:"
                                 f" **{solved_tasks} из {total_tasks}** ({pct}%)"
                             )
                             col_c1.progress(pct / 100)
@@ -1661,19 +1711,18 @@ elif role == "student":
                             st.session_state.solving_course_id = cid
                             st.rerun()
 
-                    # Добавляем тонкую линию разделения между курсами (кроме последнего)
                     if idx_c < len(course_keys) - 1:
                         st.markdown(
-                            '<hr style="margin: 20px 0; border: none; border-top: 1px solid'
-                            ' #cbd5e1;">',
+                            '<hr style="margin: 24px 0; border: none; border-top: 1px solid'
+                            ' #e2e8f0;">',
                             unsafe_allow_html=True,
                         )
 
     elif menu == "Расписание":
-        st.title("Расписание занятий 📅")
+        st.title("Расписание занятий")
         st.markdown(
             "<p style='color: #64748b; margin-top: -10px; margin-bottom:"
-            " 25px;'>Ваши персональные веб-уроки и вебинары</p>",
+            " 32px;'>Ваши персональные веб-уроки и вебинары</p>",
             unsafe_allow_html=True,
         )
         my_lessons = st.session_state.schedule.get(curr_user, [])
@@ -1681,26 +1730,23 @@ elif role == "student":
             st.info("В вашем расписании пока нет запланированных занятий.")
         else:
             for idx, l in enumerate(my_lessons):
-                st.markdown('<div class="lesson-card">', unsafe_allow_html=True)
-                with st.container(border=True):
-                    st.markdown(f"#### 📚 Тема: {l['title']}")
+                with st.container():
+                    st.markdown(f"#### Тема: {l['title']}")
                     st.markdown(
-                        "📅 Дата и время:"
+                        "Дата и время:"
                         " **<span style='font-size: 1.2rem; font-weight:"
-                        f" 800;'>{l['datetime']} (МСК)</span>**",
+                        f" 800; color: #4f46e5;'>{l['datetime']} (МСК)</span>**",
                         unsafe_allow_html=True,
                     )
                     if l["link"]:
-                        st.link_button("🔗 Подключиться", l["link"], use_container_width=True)
+                        st.link_button("Подключиться к трансляции", l["link"], use_container_width=True)
                     else:
                         st.button(
-                            "🔗 Ссылка появится позже",
+                            "Ссылка появится позже",
                             disabled=True,
                             use_container_width=True,
                             key=f"nolink_{curr_user}_{idx}",
                         )
-                st.markdown("</div>", unsafe_allow_html=True)
-                st.markdown("<br>", unsafe_allow_html=True)
 
     elif menu == "Пробные экзамены":
         if st.session_state.solving_mock_id is not None:
@@ -1732,7 +1778,7 @@ elif role == "student":
                 current_exam["status"] = "pending_review"
                 st.session_state.solving_mock_id = None
                 st.warning(
-                    "⏱️ Время вышло! Пробный экзамен автоматически отправлен"
+                    "Время вышло. Пробный экзамен автоматически отправлен"
                     " преподавателю на проверку."
                 )
                 st.rerun()
@@ -1753,9 +1799,9 @@ elif role == "student":
             )
             st.markdown(
                 f"""
-                <div style="background: linear-gradient(135deg, #eef2ff, #fae8ff); padding: 16px; border-radius: 16px; margin-bottom: 20px; border: 1px solid #e0e7ff; display: flex; justify-content: space-between; align-items: center;">
-                    <div style="font-weight: 700; color: #4338ca; font-size: 1.1rem;">⏳ Осталось времени: {rem_min:02d}:{rem_sec:02d}</div>
-                    <div style="font-size: 0.9rem; color: #64748b;">Картинки и ответы принимаются без мгновенной проверки</div>
+                <div style="background: white; padding: 16px 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(15,23,42,0.03); display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-weight: 800; color: #f43f5e; font-size: 1.25rem;">⏳ {rem_min:02d}:{rem_sec:02d}</div>
+                    <div style="font-size: 0.9rem; color: #64748b; font-weight: 500;">Картинки и ответы принимаются без мгновенной проверки</div>
                 </div>
             """,
                 unsafe_allow_html=True,
@@ -1776,7 +1822,7 @@ elif role == "student":
                 col_i = i % 8
                 with cols_m_nav[col_i]:
                     has_ans = (
-                        "✏️" if current_exam["student_answers"].get(i) else "⚪"
+                        "✔️" if current_exam["student_answers"].get(i) else "⚪"
                     )
                     if st.button(
                             f"#{i + 1} {has_ans}",
@@ -1804,17 +1850,19 @@ elif role == "student":
             st.markdown("<br>", unsafe_allow_html=True)
             col_mp, col_mn = st.columns(2)
             if m_idx > 0:
-                if col_mp.button("← Предыдущее задание", use_container_width=True):
+                st.markdown('<div class="btn-secondary">', unsafe_allow_html=True)
+                if col_mp.button("Предыдущее задание", use_container_width=True):
                     st.session_state.mock_task_idx -= 1
                     st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
             if m_idx < len(tasks) - 1:
-                if col_mn.button("Следующее задание →", use_container_width=True):
+                if col_mn.button("Следующее задание", use_container_width=True):
                     st.session_state.mock_task_idx += 1
                     st.rerun()
 
             st.markdown("<br><br>", unsafe_allow_html=True)
             if st.button(
-                    "📤 Завершить экзамен и отправить преподавателю",
+                    "Завершить экзамен и отправить преподавателю",
                     use_container_width=True,
             ):
                 current_exam["status"] = "pending_review"
@@ -1823,10 +1871,10 @@ elif role == "student":
                 st.rerun()
 
         else:
-            st.title("Система пробных экзаменов 📝")
+            st.title("Система пробных экзаменов")
             st.markdown(
                 "<p style='color: #64748b; margin-top: -10px; margin-bottom:"
-                " 25px;'>Ваши пробные варианты с таймером и результатами</p>",
+                " 32px;'>Ваши пробные варианты с таймером и результатами</p>",
                 unsafe_allow_html=True,
             )
 
@@ -1839,45 +1887,45 @@ elif role == "student":
                     status = ex.get("status", "not_started")
 
                     if status == "graded":
-                        badge_bg = "#64748b"
+                        badge_bg = "rgba(255,255,255,0.2)"
                         badge_text = "Проверено"
                         max_s = ex.get("max_score", len(ex["tasks"]))
                         p_s = ex.get("primary_score", 0)
                         score_display = f"{p_s}/{max_s}"
                         grade_display = ex.get("grade", "—")
                     elif status == "pending_review":
-                        badge_bg = "#10b981"
+                        badge_bg = "rgba(255,255,255,0.2)"
                         badge_text = "Отправлено"
                         score_display = "—"
                         grade_display = "—"
                     elif status == "in_progress":
-                        badge_bg = "#f59e0b"
+                        badge_bg = "rgba(255,255,255,0.2)"
                         badge_text = "В процессе"
                         score_display = "—"
                         grade_display = "—"
                     else:
-                        badge_bg = "#3b82f6"
+                        badge_bg = "rgba(255,255,255,0.2)"
                         badge_text = "Не начат"
                         score_display = "—"
                         grade_display = "—"
 
                     st.markdown(
                         f"""
-                        <div style="background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); border-radius: 24px; padding: 28px; color: white; margin-bottom: 20px; box-shadow: 0 15px 35px rgba(37, 99, 235, 0.25);">
+                        <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border-radius: 24px; padding: 32px; color: white; margin-bottom: 24px; box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.4);">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                                <span style="background: {badge_bg}; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">{badge_text}</span>
+                                <span style="background: {badge_bg}; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700;">{badge_text}</span>
                                 <span style="font-size: 0.85rem; font-weight: 600; opacity: 0.9;">Пробник</span>
                             </div>
-                            <h3 style="color: white; font-size: 1.25rem; font-weight: 800; margin-bottom: 12px; line-height: 1.4;">{ex.get('title', f'Пробный вариант ЕГЭ №{ex["number"]}')}</h3>
-                            <p style="color: rgba(255, 255, 255, 0.9); font-size: 0.95rem; line-height: 1.5; margin-bottom: 24px;">{ex.get('description', 'Постарайтесь прорешать тест за отведенное время.')}</p>
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                            <h3 style="color: white; font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; line-height: 1.3;">{ex.get('title', f'Пробный вариант ЕГЭ №{ex["number"]}')}</h3>
+                            <p style="color: rgba(255, 255, 255, 0.9); font-size: 1rem; line-height: 1.5; margin-bottom: 32px;">{ex.get('description', 'Постарайтесь прорешать тест за отведенное время.')}</p>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 24px;">
                                 <div>
                                     <div style="font-size: 0.85rem; font-weight: 600; opacity: 0.8; margin-bottom: 4px;">Оценка за экзамен</div>
-                                    <div style="font-size: 1.5rem; font-weight: 900;">{grade_display}</div>
+                                    <div style="font-size: 1.75rem; font-weight: 900;">{grade_display}</div>
                                 </div>
                                 <div style="text-align: right;">
                                     <div style="font-size: 0.85rem; font-weight: 600; opacity: 0.8; margin-bottom: 4px;">Баллы</div>
-                                    <div style="font-size: 2.2rem; font-weight: 900; line-height: 1;">{score_display}</div>
+                                    <div style="font-size: 2.5rem; font-weight: 900; line-height: 1;">{score_display}</div>
                                 </div>
                             </div>
                         </div>
@@ -1885,10 +1933,9 @@ elif role == "student":
                         unsafe_allow_html=True,
                     )
 
-                    col_b1, col_b2 = st.columns([1, 1])
                     if status == "not_started":
                         if st.button(
-                                f"🚀 Начать пробный экзамен №{ex['number']}",
+                                f"Начать пробный экзамен №{ex['number']}",
                                 key=f"start_mock_{ex['number']}",
                                 use_container_width=True,
                         ):
@@ -1897,7 +1944,7 @@ elif role == "student":
                             st.rerun()
                     elif status == "in_progress":
                         if st.button(
-                                f"▶️ Продолжить экзамен №{ex['number']}",
+                                f"Продолжить экзамен №{ex['number']}",
                                 key=f"resume_mock_{ex['number']}",
                                 use_container_width=True,
                         ):
@@ -1905,11 +1952,10 @@ elif role == "student":
                             st.rerun()
                     elif status == "pending_review":
                         st.info(
-                            "⏳ Экзамен отправлен преподавателю. Ожидается проверка и"
-                            " выставление баллов."
+                            "Экзамен отправлен преподавателю. Ожидается проверка и выставление баллов."
                         )
                     elif status == "graded":
-                        with st.expander("📖 Посмотреть ваши ответы и детали"):
+                        with st.expander("Посмотреть ваши ответы и детали"):
                             for idx_t, t_item in enumerate(ex["tasks"]):
                                 st.write(
                                     f"**Задание №{idx_t + 1}:** {t_item['question_text']}"
@@ -1922,24 +1968,25 @@ elif role == "student":
                                 st.markdown("---")
                     st.markdown("<br>", unsafe_allow_html=True)
 
-    elif menu == "Сообщения ✉️":
-        st.title("Сообщения с преподавателем ✉️")
+    elif menu == "Сообщения":
+        st.title("Сообщения с преподавателем")
         st.markdown(
             "<p style='color: #64748b; margin-top: -10px; margin-bottom:"
-            " 25px;'>Задавайте вопросы и получайте обратную связь</p>",
+            " 32px;'>Задавайте вопросы и получайте обратную связь</p>",
             unsafe_allow_html=True,
         )
-
-        msg_input = st.text_input("Написать преподавателю вопрос:")
-        if st.button("Отправить сообщение"):
-            if msg_input:
-                if curr_user not in st.session_state.messages:
-                    st.session_state.messages[curr_user] = []
-                st.session_state.messages[curr_user].append(
-                    {"sender": "student", "text": msg_input}
-                )
-                st.toast("Сообщение отправлено преподавателю!")
-                st.rerun()
+        
+        with st.container():
+            msg_input = st.text_input("Написать преподавателю вопрос:")
+            if st.button("Отправить сообщение"):
+                if msg_input:
+                    if curr_user not in st.session_state.messages:
+                        st.session_state.messages[curr_user] = []
+                    st.session_state.messages[curr_user].append(
+                        {"sender": "student", "text": msg_input}
+                    )
+                    st.toast("Сообщение отправлено преподавателю!")
+                    st.rerun()
 
         st.markdown("---")
         user_msgs = st.session_state.messages.get(curr_user, [])
@@ -1948,6 +1995,6 @@ elif role == "student":
         else:
             for m in user_msgs:
                 st.write(
-                    f"{'👨‍💻 Вы' if m['sender'] == 'student' else '👨‍🏫 Преподаватель'}:"
+                    f"{'Вы' if m['sender'] == 'student' else 'Преподаватель'}:"
                     f" {m['text']}"
                 )
